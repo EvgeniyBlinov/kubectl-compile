@@ -1,0 +1,31 @@
+# vim: set noet ci pi sts=0 sw=4 ts=4 :
+FROM golang:latest
+
+ARG VERSION='1.15.5'
+ENV VERSION ${VERSION}
+
+RUN set -ex \
+	&& mkdir -p $GOPATH/src/github.com/kubernetes && cd $_
+
+RUN set -ex \
+	&& cd $GOPATH/src/github.com/kubernetes \
+	&& git clone https://github.com/kubernetes/kubectl
+
+RUN apt update && apt install -qqy rsync
+
+RUN set -ex \
+	&& cd $GOPATH/src/github.com/kubernetes/kubectl \
+	&& git checkout kubernetes-${VERSION}
+
+RUN go get -u github.com/golang/dep/...
+
+RUN set -ex \
+	&& cd $GOPATH/src/github.com/kubernetes/kubectl \
+	&& ls -laF ./ \
+	&& go mod download \
+	&& dep init \
+	&& ls -laF ./ \
+	&& dep ensure -v \
+	&& go build
+
+CMD ["tail", "-f", "/dev/null"]
