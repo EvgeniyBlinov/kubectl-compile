@@ -9,6 +9,10 @@ ENV GO_VERSION ${GO_VERSION}
 ENV FORCE_ALL true
 ENV SILENT false
 
+RUN apt update \
+	&& apt install -yqq \
+		jq
+
 RUN go version \
 	&& echo "git tag=${GIT_TAG}"
 
